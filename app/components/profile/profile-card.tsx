@@ -1,6 +1,7 @@
 "use client"
 
 import { User } from "next-auth"
+import { useTranslations, useLocale } from "next-intl"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { signOut } from "next-auth/react"
@@ -19,13 +20,18 @@ interface ProfileCardProps {
 }
 
 const roleConfigs = {
-  emperor: { name: '皇帝', icon: Crown },
-  duke: { name: '公爵', icon: Gem },
-  knight: { name: '骑士', icon: Sword },
-  civilian: { name: '平民', icon: User2 },
+  emperor: { key: 'EMPEROR', icon: Crown },
+  duke: { key: 'DUKE', icon: Gem },
+  knight: { key: 'KNIGHT', icon: Sword },
+  civilian: { key: 'CIVILIAN', icon: User2 },
 } as const
 
 export function ProfileCard({ user }: ProfileCardProps) {
+  const t = useTranslations("profile.card")
+  const tAuth = useTranslations("auth.signButton")
+  const tWebhook = useTranslations("profile.webhook")
+  const tNav = useTranslations("common.nav")
+  const locale = useLocale()
   const router = useRouter()
   const { checkPermission } = useRolePermission()
   const canManageWebhook = checkPermission(PERMISSIONS.MANAGE_WEBHOOK)
@@ -40,7 +46,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
             {user.image && (
               <Image
                 src={user.image}
-                alt={user.name || "用户头像"}
+                alt={user.name || tAuth("userAvatar")}
                 width={80}
                 height={80}
                 className="rounded-full ring-2 ring-primary/20"
@@ -55,14 +61,14 @@ export function ProfileCard({ user }: ProfileCardProps) {
                   // 先简单实现，后续再完善
                   <div className="flex items-center gap-1 text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full flex-shrink-0">
                     <Github className="w-3 h-3" />
-                    已关联
+                    {tAuth("linked")}
                   </div>
                 )
               }
             </div>
             <p className="text-sm text-muted-foreground truncate mt-1">
               {
-                user.email ? user.email : `用户名: ${user.username}`
+                user.email ? user.email : `${t("name")}: ${user.username}`
               }
             </p>
             {user.roles && (
@@ -70,14 +76,15 @@ export function ProfileCard({ user }: ProfileCardProps) {
                 {user.roles.map(({ name }) => {
                   const roleConfig = roleConfigs[name as keyof typeof roleConfigs]
                   const Icon = roleConfig.icon
+                  const roleName = t(`roles.${roleConfig.key}` as any)
                   return (
                     <div 
                       key={name}
                       className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded"
-                      title={roleConfig.name}
+                      title={roleName}
                     >
                       <Icon className="w-3 h-3" />
-                      {roleConfig.name}
+                      {roleName}
                     </div>
                   )
                 })}
@@ -91,7 +98,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
         <div className="bg-background rounded-lg border-2 border-primary/20 p-6">
           <div className="flex items-center gap-2 mb-6">
             <Settings className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-semibold">Webhook 配置</h2>
+            <h2 className="text-lg font-semibold">{tWebhook("title")}</h2>
           </div>
           <WebhookConfig />
         </div>
@@ -104,18 +111,18 @@ export function ProfileCard({ user }: ProfileCardProps) {
 
       <div className="flex flex-col sm:flex-row gap-4 px-1">
         <Button 
-          onClick={() => router.push("/moe")}
+          onClick={() => router.push(`/${locale}/moe`)}
           className="gap-2 flex-1"
         >
           <Mail className="w-4 h-4" />
-          返回邮箱
+          {tNav("backToMailbox")}
         </Button>
         <Button 
           variant="outline" 
-          onClick={() => signOut({ callbackUrl: "/" })}
+          onClick={() => signOut({ callbackUrl: `/${locale}` })}
           className="flex-1"
         >
-          退出登录
+          {tAuth("logout")}
         </Button>
       </div>
     </div>

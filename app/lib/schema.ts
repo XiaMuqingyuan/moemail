@@ -114,6 +114,36 @@ export const apiKeys = sqliteTable('api_keys', {
   nameUserIdUnique: uniqueIndex('name_user_id_unique').on(table.name, table.userId)
 }));
 
+export const emailShares = sqliteTable('email_share', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  emailId: text('email_id')
+    .notNull()
+    .references(() => emails.id, { onDelete: "cascade" }),
+  token: text('token').notNull().unique(),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  expiresAt: integer('expires_at', { mode: 'timestamp_ms' }),
+}, (table) => ({
+  emailIdIdx: index('email_share_email_id_idx').on(table.emailId),
+  tokenIdx: index('email_share_token_idx').on(table.token),
+}));
+
+export const messageShares = sqliteTable('message_share', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  messageId: text('message_id')
+    .notNull()
+    .references(() => messages.id, { onDelete: "cascade" }),
+  token: text('token').notNull().unique(),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  expiresAt: integer('expires_at', { mode: 'timestamp_ms' }),
+}, (table) => ({
+  messageIdIdx: index('message_share_message_id_idx').on(table.messageId),
+  tokenIdx: index('message_share_token_idx').on(table.token),
+}));
+
 
 
 export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
@@ -141,4 +171,18 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const rolesRelations = relations(roles, ({ many }) => ({
   userRoles: many(userRoles),
+}));
+
+export const emailSharesRelations = relations(emailShares, ({ one }) => ({
+  email: one(emails, {
+    fields: [emailShares.emailId],
+    references: [emails.id],
+  }),
+}));
+
+export const messageSharesRelations = relations(messageShares, ({ one }) => ({
+  message: one(messages, {
+    fields: [messageShares.messageId],
+    references: [messages.id],
+  }),
 }));

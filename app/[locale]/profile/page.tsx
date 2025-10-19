@@ -2,14 +2,21 @@ import { Header } from "@/components/layout/header"
 import { ProfileCard } from "@/components/profile/profile-card"
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import type { Locale } from "@/i18n/config"
 
 export const runtime = "edge"
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale: localeFromParams } = await params
+  const locale = localeFromParams as Locale
   const session = await auth()
   
   if (!session?.user) {
-    redirect("/")
+    redirect(`/${locale}`)
   }
 
   return (
@@ -22,4 +29,5 @@ export default async function ProfilePage() {
       </div>
     </div>
   )
-} 
+}
+

@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Settings } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
@@ -16,6 +17,8 @@ import {
 import { EMAIL_CONFIG } from "@/config"
 
 export function WebsiteConfigPanel() {
+  const t = useTranslations("profile.website")
+  const tCard = useTranslations("profile.card")
   const [defaultRole, setDefaultRole] = useState<string>("")
   const [emailDomains, setEmailDomains] = useState<string>("")
   const [adminContact, setAdminContact] = useState<string>("")
@@ -58,16 +61,16 @@ export function WebsiteConfigPanel() {
         }),
       })
 
-      if (!res.ok) throw new Error("保存失败")
+      if (!res.ok) throw new Error(t("saveFailed"))
 
       toast({
-        title: "保存成功",
-        description: "网站设置已更新",
+        title: t("saveSuccess"),
+        description: t("saveSuccess"),
       })
     } catch (error) {
       toast({
-        title: "保存失败",
-        description: error instanceof Error ? error.message : "请稍后重试",
+        title: t("saveFailed"),
+        description: error instanceof Error ? error.message : t("saveFailed"),
         variant: "destructive",
       })
     } finally {
@@ -79,48 +82,48 @@ export function WebsiteConfigPanel() {
     <div className="bg-background rounded-lg border-2 border-primary/20 p-6">
       <div className="flex items-center gap-2 mb-6">
         <Settings className="w-5 h-5 text-primary" />
-        <h2 className="text-lg font-semibold">网站设置</h2>
+        <h2 className="text-lg font-semibold">{t("title")}</h2>
       </div>
 
       <div className="space-y-4">
         <div className="flex items-center gap-4">
-          <span className="text-sm">新用户默认角色:</span>
+          <span className="text-sm">{t("defaultRole")}:</span>
           <Select value={defaultRole} onValueChange={setDefaultRole}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ROLES.DUKE}>公爵</SelectItem>
-              <SelectItem value={ROLES.KNIGHT}>骑士</SelectItem>
-              <SelectItem value={ROLES.CIVILIAN}>平民</SelectItem>
+              <SelectItem value={ROLES.DUKE}>{tCard("roles.DUKE")}</SelectItem>
+              <SelectItem value={ROLES.KNIGHT}>{tCard("roles.KNIGHT")}</SelectItem>
+              <SelectItem value={ROLES.CIVILIAN}>{tCard("roles.CIVILIAN")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="text-sm">邮箱域名:</span>
+          <span className="text-sm">{t("emailDomains")}:</span>
           <div className="flex-1">
             <Input 
               value={emailDomains}
               onChange={(e) => setEmailDomains(e.target.value)}
-              placeholder="多个域名用逗号分隔，如: moemail.app,bitibiti.com"
+              placeholder={t("emailDomainsPlaceholder")}
             />
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="text-sm">管理员联系方式:</span>
+          <span className="text-sm">{t("adminContact")}:</span>
           <div className="flex-1">
             <Input 
               value={adminContact}
               onChange={(e) => setAdminContact(e.target.value)}
-              placeholder="如: 微信号、邮箱等"
+              placeholder={t("adminContactPlaceholder")}
             />
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="text-sm">最大邮箱数量:</span>
+          <span className="text-sm">{t("maxEmails")}:</span>
           <div className="flex-1">
             <Input 
               type="number"
@@ -128,7 +131,7 @@ export function WebsiteConfigPanel() {
               max="100"
               value={maxEmails}
               onChange={(e) => setMaxEmails(e.target.value)}
-              placeholder={`默认为 ${EMAIL_CONFIG.MAX_ACTIVE_EMAILS}`}
+              placeholder={`${EMAIL_CONFIG.MAX_ACTIVE_EMAILS}`}
             />
           </div>
         </div>
@@ -138,7 +141,7 @@ export function WebsiteConfigPanel() {
           disabled={loading}
           className="w-full"
         >
-          保存
+          {t("save")}
         </Button>
       </div>
     </div>

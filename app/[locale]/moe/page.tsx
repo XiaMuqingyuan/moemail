@@ -5,14 +5,21 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { checkPermission } from "@/lib/auth"
 import { PERMISSIONS } from "@/lib/permissions"
+import type { Locale } from "@/i18n/config"
 
 export const runtime = "edge"
 
-export default async function MoePage() {
+export default async function MoePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale: localeFromParams } = await params
+  const locale = localeFromParams as Locale
   const session = await auth()
   
   if (!session?.user) {
-    redirect("/")
+    redirect(`/${locale}`)
   }
 
   const hasPermission = await checkPermission(PERMISSIONS.MANAGE_EMAIL)
@@ -28,4 +35,5 @@ export default async function MoePage() {
       </div>
     </div>
   )
-} 
+}
+

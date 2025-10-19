@@ -1,5 +1,5 @@
-import type { NextConfig } from "next";
 import withPWA from 'next-pwa'
+import createNextIntlPlugin from 'next-intl/plugin'
 import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
 
 async function setup() {
@@ -10,7 +10,9 @@ async function setup() {
 
 setup()
 
-const nextConfig: NextConfig = {
+const withNextIntl = createNextIntlPlugin('./app/i18n/request.ts')
+
+const nextConfig = {
   images: {
     remotePatterns: [
       {
@@ -21,10 +23,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPWA({
+const withPWAConfigured = withPWA({
   dest: 'public',
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
-  // @ts-expect-error "ignore the error"
-})(nextConfig);
+}) as any
+
+const configWithPWA = withPWAConfigured(nextConfig as any) as any
+
+export default withNextIntl(configWithPWA)
