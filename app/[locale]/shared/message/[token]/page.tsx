@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server"
 import { getSharedMessage } from "@/lib/shared-data"
 import { SharedErrorPage } from "@/components/emails/shared-error-page"
 import { SharedMessagePageClient } from "./page-client"
@@ -12,7 +11,6 @@ interface PageProps {
 
 export default async function SharedMessagePage({ params }: PageProps) {
   const { token } = await params
-  const tShared = await getTranslations("emails.shared")
   
   // 服务端获取数据
   const message = await getSharedMessage(token)
@@ -20,11 +18,11 @@ export default async function SharedMessagePage({ params }: PageProps) {
   if (!message) {
     return (
       <SharedErrorPage
-        title={tShared("messageNotFound")}
-        subtitle={tShared("linkExpired")}
-        error={tShared("linkInvalid")}
-        description={tShared("linkInvalidDescription")}
-        ctaText={tShared("createOwnEmail")}
+        titleKey="messageNotFound"
+        subtitleKey="linkExpired"
+        errorKey="linkInvalid"
+        descriptionKey="linkInvalidDescription"
+        ctaTextKey="createOwnEmail"
       />
     )
   }

@@ -1,8 +1,7 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
-import { usePathname, useRouter } from "next/navigation"
-import { i18n } from "@/i18n/config"
+import { useLocaleSwitcher } from "@/hooks/use-locale-switcher"
+import { LOCALE_LABELS } from "@/i18n/config"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,49 +12,25 @@ import { Button } from "@/components/ui/button"
 import { Languages } from "lucide-react"
 
 export function LanguageSwitcher() {
-  const t = useTranslations("common")
-  const locale = useLocale()
-  const router = useRouter()
-  const pathname = usePathname()
-
-  const switchLocale = (newLocale: string) => {
-    if (newLocale === locale) return
-
-    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`
-
-    const segments = pathname.split("/")
-    if (i18n.locales.includes(segments[1] as any)) {
-      segments[1] = newLocale
-    } else {
-      segments.splice(1, 0, newLocale)
-    }
-    const newPath = segments.join("/")
-
-    router.push(newPath)
-    router.refresh()
-  }
+  const { locale, locales, switchLocale } = useLocaleSwitcher()
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" aria-label="Switch language">
           <Languages className="h-5 w-5" />
-          <span className="sr-only">{t("lang.switch")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => switchLocale("en")}
-          className={locale === "en" ? "bg-accent" : ""}
-        >
-          {t("lang.en")}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => switchLocale("zh-CN")}
-          className={locale === "zh-CN" ? "bg-accent" : ""}
-        >
-          {t("lang.zhCN")}
-        </DropdownMenuItem>
+        {locales.map((loc) => (
+          <DropdownMenuItem
+            key={loc}
+            onClick={() => switchLocale(loc)}
+            className={locale === loc ? "bg-accent" : ""}
+          >
+            {LOCALE_LABELS[loc]}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )

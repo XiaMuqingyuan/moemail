@@ -107,6 +107,15 @@
     "adminContact": "管理员联系方式",
     "adminContactPlaceholder": "邮箱或其他联系方式",
     "maxEmails": "每个用户最大邮箱数",
+    "turnstile": {
+      "enable": "启用 Cloudflare Turnstile",
+      "enableDescription": "开启后，账号登录与注册将需要通过 Turnstile 验证",
+      "siteKey": "Site Key",
+      "siteKeyPlaceholder": "输入 Turnstile Site Key",
+      "secretKey": "Secret Key",
+      "secretKeyPlaceholder": "输入 Turnstile Secret Key",
+      "secretKeyDescription": "开启前请先在 Cloudflare 创建 Turnstile，并填写上述必填参数"
+    },
     "save": "保存配置",
     "saving": "保存中...",
     "saveSuccess": "配置保存成功",
@@ -128,4 +137,3 @@
     "updateFailed": "更新用户角色失败"
   }
 }
-

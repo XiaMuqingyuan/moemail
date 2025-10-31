@@ -107,6 +107,15 @@
     "adminContact": "Admin Contact",
     "adminContactPlaceholder": "Email or other contact method",
     "maxEmails": "Max Emails per User",
+    "turnstile": {
+      "enable": "Enable Cloudflare Turnstile",
+      "enableDescription": "When enabled, username/password login and registration require Turnstile verification",
+      "siteKey": "Site Key",
+      "siteKeyPlaceholder": "Enter Turnstile Site Key",
+      "secretKey": "Secret Key",
+      "secretKeyPlaceholder": "Enter Turnstile Secret Key",
+      "secretKeyDescription": "Set up a Turnstile application in Cloudflare and provide the required keys before enabling"
+    },
     "save": "Save Configuration",
     "saving": "Saving...",
     "saveSuccess": "Configuration saved successfully",
@@ -128,4 +137,3 @@
     "updateFailed": "Failed to update user role"
   }
 }
-

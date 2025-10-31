@@ -7,6 +7,9 @@ import { useToast } from "@/components/ui/use-toast"
 import { useState, useEffect } from "react"
 import { Role, ROLES } from "@/lib/permissions"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+import { Eye, EyeOff } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -23,6 +26,10 @@ export function WebsiteConfigPanel() {
   const [emailDomains, setEmailDomains] = useState<string>("")
   const [adminContact, setAdminContact] = useState<string>("")
   const [maxEmails, setMaxEmails] = useState<string>(EMAIL_CONFIG.MAX_ACTIVE_EMAILS.toString())
+  const [turnstileEnabled, setTurnstileEnabled] = useState(false)
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState("")
+  const [turnstileSecretKey, setTurnstileSecretKey] = useState("")
+  const [showSecretKey, setShowSecretKey] = useState(false)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
@@ -38,12 +45,20 @@ export function WebsiteConfigPanel() {
         defaultRole: Exclude<Role, typeof ROLES.EMPEROR>,
         emailDomains: string,
         adminContact: string,
-        maxEmails: string
+        maxEmails: string,
+        turnstile?: {
+          enabled: boolean,
+          siteKey: string,
+          secretKey?: string
+        }
       }
       setDefaultRole(data.defaultRole)
       setEmailDomains(data.emailDomains)
       setAdminContact(data.adminContact)
       setMaxEmails(data.maxEmails || EMAIL_CONFIG.MAX_ACTIVE_EMAILS.toString())
+      setTurnstileEnabled(Boolean(data.turnstile?.enabled))
+      setTurnstileSiteKey(data.turnstile?.siteKey ?? "")
+      setTurnstileSecretKey(data.turnstile?.secretKey ?? "")
     }
   }
 
@@ -57,7 +72,12 @@ export function WebsiteConfigPanel() {
           defaultRole, 
           emailDomains,
           adminContact,
-          maxEmails: maxEmails || EMAIL_CONFIG.MAX_ACTIVE_EMAILS.toString()
+          maxEmails: maxEmails || EMAIL_CONFIG.MAX_ACTIVE_EMAILS.toString(),
+          turnstile: {
+            enabled: turnstileEnabled,
+            siteKey: turnstileSiteKey,
+            secretKey: turnstileSecretKey
+          }
         }),
       })
 
@@ -133,6 +153,63 @@ export function WebsiteConfigPanel() {
               onChange={(e) => setMaxEmails(e.target.value)}
               placeholder={`${EMAIL_CONFIG.MAX_ACTIVE_EMAILS}`}
             />
+          </div>
+        </div>
+
+        <div className="space-y-4 rounded-lg border border-dashed border-primary/40 p-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="turnstile-enabled" className="text-sm font-medium">
+                {t("turnstile.enable")}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {t("turnstile.enableDescription")}
+              </p>
+            </div>
+            <Switch
+              id="turnstile-enabled"
+              checked={turnstileEnabled}
+              onCheckedChange={setTurnstileEnabled}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="turnstile-site-key" className="text-sm font-medium">
+              {t("turnstile.siteKey")}
+            </Label>
+            <Input
+              id="turnstile-site-key"
+              value={turnstileSiteKey}
+              onChange={(e) => setTurnstileSiteKey(e.target.value)}
+              placeholder={t("turnstile.siteKeyPlaceholder")}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="turnstile-secret-key" className="text-sm font-medium">
+              {t("turnstile.secretKey")}
+            </Label>
+            <div className="relative">
+              <Input
+                id="turnstile-secret-key"
+                type={showSecretKey ? "text" : "password"}
+                value={turnstileSecretKey}
+                onChange={(e) => setTurnstileSecretKey(e.target.value)}
+                placeholder={t("turnstile.secretKeyPlaceholder")}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                onClick={() => setShowSecretKey((prev) => !prev)}
+              >
+                {showSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t("turnstile.secretKeyDescription")}
+            </p>
           </div>
         </div>
 

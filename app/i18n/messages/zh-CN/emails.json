@@ -3,7 +3,9 @@
     "title": "权限不足",
     "description": "你没有权限访问此页面，请联系网站管理员",
     "adminContact": "管理员联系方式",
-    "backToHome": "返回首页"
+    "backToHome": "返回首页",
+    "needPermission": "需要公爵或更高权限才能管理 API Key",
+    "contactAdmin": "请联系网站管理员升级您的角色"
   },
   "layout": {
     "myEmails": "我的邮箱",
@@ -165,4 +167,3 @@
     }
   }
 }
-

@@ -188,7 +188,6 @@ export function SharedEmailPageClient({
               return tShared("sharedMailbox")
             }
           })()}
-          showCta={true}
           ctaText={tShared("createOwnEmail")}
         />
 

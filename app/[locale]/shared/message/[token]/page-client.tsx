@@ -37,7 +37,6 @@ export function SharedMessagePageClient({ message }: SharedMessagePageClientProp
             : message.emailExpiresAt
               ? `${tShared("expiresAt")}: ${new Date(message.emailExpiresAt).toLocaleString()}`
               : tShared("sharedMessage")}
-          showCta={true}
           ctaText={tShared("createOwnEmail")}
         />
 

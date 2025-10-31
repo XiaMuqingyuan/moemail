@@ -70,7 +70,7 @@ export async function generateMetadata({
     },
     openGraph: {
       type: "website",
-      locale: locale === "zh-CN" ? "zh_CN" : locale,
+      locale: locale === "zh-CN" ? "zh_CN" : locale === "zh-TW" ? "zh_TW" : locale,
       url: `${baseUrl}/${locale}`,
       title: t("title"),
       description: t("description"),
@@ -144,5 +144,4 @@ export default async function LocaleLayout({
     </html>
   )
 }
-
 

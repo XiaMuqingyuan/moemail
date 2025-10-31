@@ -7,6 +7,14 @@ declare global {
     SITE_CONFIG: KVNamespace;
   }
 
+  interface Window {
+    turnstile?: {
+      render: (element: HTMLElement | string, options: Record<string, unknown>) => string
+      reset: (widgetId?: string) => void
+      remove: (widgetId: string) => void
+    }
+  }
+
   type Env = CloudflareEnv
 }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { signIn } from "next-auth/react"
 import { useTranslations } from "next-intl"
 import { useToast } from "@/components/ui/use-toast"
@@ -21,6 +21,16 @@ import {
 } from "@/components/ui/tabs"
 import { Github, Loader2, KeyRound, User2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Turnstile } from "@/components/auth/turnstile"
+
+interface TurnstileConfigProps {
+  enabled: boolean
+  siteKey: string
+}
+
+interface LoginFormProps {
+  turnstile?: TurnstileConfigProps
+}
 
 interface FormErrors {
   username?: string
@@ -28,14 +38,49 @@ interface FormErrors {
   confirmPassword?: string
 }
 
-export function LoginForm() {
+export function LoginForm({ turnstile }: LoginFormProps) {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
+  const [turnstileToken, setTurnstileToken] = useState("")
+  const [turnstileResetCounter, setTurnstileResetCounter] = useState(0)
+  const [activeTab, setActiveTab] = useState<"login" | "register">("login")
   const { toast } = useToast()
   const t = useTranslations("auth.loginForm")
+
+  const turnstileSiteKey = turnstile?.siteKey ?? ""
+  const turnstileEnabled = Boolean(turnstile?.enabled && turnstileSiteKey)
+
+  const resetTurnstile = useCallback(() => {
+    setTurnstileToken("")
+    setTurnstileResetCounter((prev) => prev + 1)
+  }, [])
+
+  const ensureTurnstileSolved = () => {
+    if (!turnstileEnabled) return true
+    if (turnstileToken) return true
+
+    toast({
+      title: t("toast.turnstileRequired"),
+      description: t("toast.turnstileRequiredDesc"),
+      variant: "destructive",
+    })
+    return false
+  }
+
+  const clearForm = () => {
+    setUsername("")
+    setPassword("")
+    setConfirmPassword("")
+    setErrors({})
+  }
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as "login" | "register")
+    clearForm()
+  }
 
   const validateLoginForm = () => {
     const newErrors: FormErrors = {}
@@ -61,22 +106,25 @@ export function LoginForm() {
 
   const handleLogin = async () => {
     if (!validateLoginForm()) return
+    if (!ensureTurnstileSolved()) return
 
     setLoading(true)
     try {
       const result = await signIn("credentials", {
         username,
         password,
+        turnstileToken,
         redirect: false,
       })
 
       if (result?.error) {
         toast({
           title: t("toast.loginFailed"),
-          description: t("toast.loginFailedDesc"),
+          description: result.error,
           variant: "destructive",
         })
         setLoading(false)
+        resetTurnstile()
         return
       }
 
@@ -88,18 +136,20 @@ export function LoginForm() {
         variant: "destructive",
       })
       setLoading(false)
+      resetTurnstile()
     }
   }
 
   const handleRegister = async () => {
     if (!validateRegisterForm()) return
+    if (!ensureTurnstileSolved()) return
 
     setLoading(true)
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, turnstileToken }),
       })
 
       const data = await response.json() as { error?: string }
@@ -111,6 +161,7 @@ export function LoginForm() {
           variant: "destructive",
         })
         setLoading(false)
+        resetTurnstile()
         return
       }
 
@@ -118,16 +169,18 @@ export function LoginForm() {
       const result = await signIn("credentials", {
         username,
         password,
+        turnstileToken,
         redirect: false,
       })
 
       if (result?.error) {
         toast({
           title: t("toast.loginFailed"),
-          description: t("toast.autoLoginFailed"),
+          description: result.error || t("toast.autoLoginFailed"),
           variant: "destructive",
         })
         setLoading(false)
+        resetTurnstile()
         return
       }
 
@@ -139,18 +192,12 @@ export function LoginForm() {
         variant: "destructive",
       })
       setLoading(false)
+      resetTurnstile()
     }
   }
 
   const handleGithubLogin = () => {
     signIn("github", { callbackUrl: "/" })
-  }
-
-  const clearForm = () => {
-    setUsername("")
-    setPassword("")
-    setConfirmPassword("")
-    setErrors({})
   }
 
   return (
@@ -164,7 +211,7 @@ export function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="px-6">
-        <Tabs defaultValue="login" className="w-full" onValueChange={clearForm}>
+        <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="login">{t("tabs.login")}</TabsTrigger>
             <TabsTrigger value="register">{t("tabs.register")}</TabsTrigger>
@@ -340,6 +387,16 @@ export function LoginForm() {
             </TabsContent>
           </div>
         </Tabs>
+        {turnstileEnabled && turnstileSiteKey && (
+          <div className={cn("space-y-2", activeTab === "login" ? "mt-4" : "")}>
+            <Turnstile
+              siteKey={turnstileSiteKey}
+              onVerify={setTurnstileToken}
+              onExpire={resetTurnstile}
+              resetSignal={turnstileResetCounter}
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   )
