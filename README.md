@@ -8,6 +8,11 @@
 </p>
 
 <p align="center">
+  <a href="./README.md">简体中文</a> | 
+  <a href="./README.en.md">English</a> 
+</p>
+
+<p align="center">
   <a href="#在线演示">在线演示</a> •
   <a href="#文档">文档</a> •
   <a href="#特性">特性</a> •
@@ -22,6 +27,7 @@
   <a href="#OpenAPI">OpenAPI</a> •
   <a href="#环境变量">环境变量</a> •
   <a href="#Github OAuth App 配置">Github OAuth App 配置</a> •
+  <a href="#Google OAuth App 配置">Google OAuth App 配置</a> •
   <a href="#贡献">贡献</a> •
   <a href="#许可证">许可证</a> •
   <a href="#交流群">交流群</a> •
@@ -782,6 +788,8 @@ console.log('分享链接:', `https://your-domain.com/shared/message/${data.toke
 ### 认证相关
 - `AUTH_GITHUB_ID`: GitHub OAuth App ID
 - `AUTH_GITHUB_SECRET`: GitHub OAuth App Secret
+- `AUTH_GOOGLE_ID`: Google OAuth App ID
+- `AUTH_GOOGLE_SECRET`: Google OAuth App Secret
 - `AUTH_SECRET`: NextAuth Secret，用来加密 session，请设置一个随机字符串
 
 ### Cloudflare 配置
@@ -796,16 +804,29 @@ console.log('分享链接:', `https://your-domain.com/shared/message/${data.toke
 
 ## Github OAuth App 配置
 
-- 登录 [Github Developer](https://github.com/settings/developers) 创建一个新的 OAuth App
-- 生成一个新的 `Client ID` 和 `Client Secret`
-- 设置 `Application name` 为 `<your-app-name>`
-- 设置 `Homepage URL` 为 `https://<your-domain>`
-- 设置 `Authorization callback URL` 为 `https://<your-domain>/api/auth/callback/github`
+1. 登录 [Github Developer](https://github.com/settings/developers) 创建一个新的 OAuth App
+2. 生成一个新的 `Client ID` 和 `Client Secret`
+3. 配置参数：
+   - `Application name`: `<your-app-name>`
+   - `Homepage URL`: `https://<your-domain>`
+   - `Authorization callback URL`: `https://<your-domain>/api/auth/callback/github`
+
+## Google OAuth App 配置
+
+1. 访问 [Google Cloud Console](https://console.cloud.google.com/) 创建项目
+2. 配置 OAuth 同意屏幕
+3. 创建 OAuth 客户端 ID
+   - 应用类型：Web 应用
+   - 已获授权的 Javascript 来源：`https://<your-domain>`
+   - 已获授权的重定向 URI：`https://<your-domain>/api/auth/callback/google`
+4. 获取 `Client ID` 和 `Client Secret`
+5. 配置环境变量 `AUTH_GOOGLE_ID` 和 `AUTH_GOOGLE_SECRET`
+
 
 
 ## 贡献
 
-欢迎提交 Pull Request 或者 Issue来帮助改进这个项目
+欢迎提交 Pull Request 或者 Issue 来帮助改进这个项目
 
 ## 许可证
 

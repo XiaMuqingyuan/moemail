@@ -1,5 +1,6 @@
 import NextAuth from "next-auth"
 import GitHub from "next-auth/providers/github"
+import Google from "next-auth/providers/google"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import { createDb, Db } from "./db"
 import { accounts, users, roles, userRoles } from "./schema"
@@ -30,7 +31,7 @@ const getDefaultRole = async (): Promise<Role> => {
   ) {
     return defaultRole as Role
   }
-  
+
   return ROLES.CIVILIAN
 }
 
@@ -102,6 +103,12 @@ export const {
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID,
       clientSecret: process.env.AUTH_GITHUB_SECRET,
+      allowDangerousEmailAccountLinking: true,
+    }),
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -119,7 +126,7 @@ export const {
         let parsedCredentials: AuthSchema
         try {
           parsedCredentials = authSchema.parse({ username, password, turnstileToken })
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           throw new Error("输入格式不正确")
         }
@@ -196,7 +203,7 @@ export const {
           where: eq(userRoles.userId, session.user.id),
           with: { role: true },
         })
-  
+
         if (!userRoleRecords.length) {
           const defaultRole = await getDefaultRole()
           const role = await findOrCreateRole(db, defaultRole)
@@ -208,10 +215,16 @@ export const {
             role: role
           }]
         }
-  
+
         session.user.roles = userRoleRecords.map(ur => ({
           name: ur.role.name,
         }))
+
+        const userAccounts = await db.query.accounts.findMany({
+          where: eq(accounts.userId, session.user.id),
+        })
+
+        session.user.providers = userAccounts.map(account => account.provider)
       }
 
       return session
@@ -224,7 +237,7 @@ export const {
 
 export async function register(username: string, password: string) {
   const db = createDb()
-  
+
   const existing = await db.query.users.findFirst({
     where: eq(users.username, username)
   })
@@ -234,7 +247,7 @@ export async function register(username: string, password: string) {
   }
 
   const hashedPassword = await hashPassword(password)
-  
+
   const [user] = await db.insert(users)
     .values({
       username,
